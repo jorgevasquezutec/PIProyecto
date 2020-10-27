@@ -1,8 +1,7 @@
-import testfuntion
+import countLeucositos
 import matlab
 
-my_testfuntion = testfuntion.initialize()
+my_testfuntion = countLeucositos.initialize()
 
-xIn = matlab.double([10], size=(1, 1))
-testOut = my_testfuntion.testfuntion(xIn)
+testOut = my_testfuntion.countLeucositos('cells.jpg')
 print(testOut)
