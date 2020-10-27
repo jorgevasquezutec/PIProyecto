@@ -1,8 +1,8 @@
-import matlab.engine
+import testfuntion
+import matlab
 
-eng=matlab.engine.start_matlab()
+my_testfuntion = testfuntion.initialize()
 
-
-
-
-eng.quit()
+xIn = matlab.double([10], size=(1, 1))
+testOut = my_testfuntion.testfuntion(xIn)
+print(testOut)
