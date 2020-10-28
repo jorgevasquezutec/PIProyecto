@@ -7,7 +7,7 @@ function n=countLeucositos(ruta)
     % figure
     % imshow(I)
     %aplicamos un ajuste de contraste
-    %I = adapthisteq(I);
+    I = adapthisteq(I);
     % figure
     % imshow(I)
     %eliminamos los bordes
