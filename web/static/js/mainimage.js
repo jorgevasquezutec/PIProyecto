@@ -40,7 +40,32 @@ $(function () {
 
   $('#icount').on('click',function(){
     var input = $(this)
-    
+    var name =input[0].form[0].files[0].name;
+    $.getJSON("/count/"+name, function (data) {
+      $.growl.notice({ message: data.count });
+    });
+
+
+  //   $.ajax({
+  //     type:'GET',
+  //     url: 'count/'+name,
+  //     // data:formData,
+  //     cache:false,
+  //     contentType: false,
+  //     processData: false,
+  //     success:function(data){
+  //       // $.growl.error({ message: "The kitten is attacking!" });
+  //       $.growl.notice({ message: data.msg });
+  //       // $.growl.warning({ message: "The kitten is ugly!" });
+  //     // </script>
+  //         console.log(data);
+  //     },
+  //     error: function(data){
+  //       $.growl.error({ message: data.msg});
+  //         console.log(data);
+  //     }
+  // });
+   
   });
 
   $('.btn-file :file').on('change', function() {
