@@ -15,7 +15,7 @@ function authenticate(){
         data : complete_user,
         dataType:'json',
         success: function(){
-            window.location="/static/html/main.html"
+            window.location="/static/html/mainimage.html"
         }
       });
 }

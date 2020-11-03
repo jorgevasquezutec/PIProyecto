@@ -1,3 +1,4 @@
+import os
 from flask import Flask,jsonify,render_template, request, session, Response, redirect
 from database import connector
 from model import entities
@@ -6,6 +7,10 @@ from sqlalchemy import and_
 import json
 import threading
 import time
+import countLeucositos
+import matlab
+from werkzeug.utils import secure_filename
+
 key_messages = 'messages'
 key_users = 'users'
 key_post='post'
@@ -15,10 +20,55 @@ db = connector.Manager()
 engine = db.createEngine()
 app = Flask(__name__, template_folder= "static/html")
 
+app.config["UPLOAD_FOLDER"] = "upload/"
+ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
+
+
 
 @app.route('/')
 def index():
     return render_template("login.html")
+
+def allowed_file(filename):
+	return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+@app.route('/upload', methods=['POST'])
+def upload_image():
+    if 'file' not in request.files:
+        message = {'msg': 'No file part!'}
+        json_msg = json.dumps(message)
+        return Response(json_msg, status=401, mimetype="application/json")
+    # return redirect(request.url)
+    file = request.files['file']
+    if file.filename == '':
+        message = {'msg': 'No image selected for uploading'}
+        json_msg = json.dumps(message)
+        return Response(json_msg, status=401, mimetype="application/json")
+    # return redirect(request.url)
+    if file and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+    #print('upload_image filename: ' + filename)
+    # flash('Image successfully uploaded and displayed')
+        message = {'msg': 'Image successfully uploaded and displayed'}
+        json_msg = json.dumps(message)
+        return Response(json_msg, status=200, mimetype="application/json")
+    else:
+        # flash('Allowed image types are -> png, jpg, jpeg, gif')
+        message = {'msg': 'Allowed image types are -> png, jpg, jpeg, gif'}
+        json_msg = json.dumps(message)
+        return Response(json_msg, status=401, mimetype="application/json")
+		# return redirect(request.url)    
+
+@app.route('/count/<image>',methods=['GET'])
+def countimage(image):
+    my_testfuntion = countLeucositos.initialize()
+    testOut = my_testfuntion.countLeucositos(app.config["UPLOAD_FOLDER"]+image)
+    my_testfuntion.terminate()
+    message = {'count': testOut}
+    json_msg = json.dumps(message)
+    return Response(json_msg, status=200, mimetype="application/json")
+# print(testOut)
 
 # Login
 @app.route('/login',methods=['POST'])
@@ -126,111 +176,111 @@ def delete_user():
 
 
 
-@app.route('/post', methods = ['POST'])
-def create_post():
-    if (not request.is_json):
-        c = json.loads(request.data)['values']
-    else:
-        c = json.loads(request.data)
+# @app.route('/post', methods = ['POST'])
+# def create_post():
+#     if (not request.is_json):
+#         c = json.loads(request.data)['values']
+#     else:
+#         c = json.loads(request.data)
 
-    post = entities.Post(
-    titulo=c['titulo'],
-    contenido = c['contenido'],
-    tipo=c['tipo'],
-    fecha_post=datetime.now(),
-    user_id=c['user_id'],
-    estado=0
-    )
-    session = db.getSession(engine)
-    session.add(post)
-    session.commit()
-    session.close()
-    message={'msg':'Post creado'} 
-    return Response(json.dumps(message), status=200, mimetype='application/json')
-
-
-@app.route('/post_likes', methods = ['POST'])
-def create_post_like():
-    if (not request.is_json):
-        c = json.loads(request.data)['values']
-    else:
-        c = json.loads(request.data)
-
-    post_likes = entities.Post_likes(
-    post_id=c['post_id'],
-    user_id = c['user_id']
-    )
-    session = db.getSession(engine)
-    session.add(post_likes)
-    session.commit()
-    session.close()
-    msj={"msj":"Like Creado"}
-    return Response(json.dumps(msj), status=200, mimetype='application/json')
+#     post = entities.Post(
+#     titulo=c['titulo'],
+#     contenido = c['contenido'],
+#     tipo=c['tipo'],
+#     fecha_post=datetime.now(),
+#     user_id=c['user_id'],
+#     estado=0
+#     )
+#     session = db.getSession(engine)
+#     session.add(post)
+#     session.commit()
+#     session.close()
+#     message={'msg':'Post creado'} 
+#     return Response(json.dumps(message), status=200, mimetype='application/json')
 
 
-@app.route('/post_likes', methods = ['DELETE'])
-def delete_post_likes():
-    post_id = json.loads(request.data)['post_id']
-    user_id = json.loads(request.data)['user_id']
-    session = db.getSession(engine)
-    like = session.query(entities.Post_likes).filter(and_(entities.Post_likes.post_id == post_id,entities.Post_likes.user_id == user_id)).one()
-    session.delete(like)
-    session.commit()
-    session.close()
-    msj={"msj":"Like borrado"} 
-    return Response(json.dumps(msj), status=200, mimetype='application/json')
+# @app.route('/post_likes', methods = ['POST'])
+# def create_post_like():
+#     if (not request.is_json):
+#         c = json.loads(request.data)['values']
+#     else:
+#         c = json.loads(request.data)
+
+#     post_likes = entities.Post_likes(
+#     post_id=c['post_id'],
+#     user_id = c['user_id']
+#     )
+#     session = db.getSession(engine)
+#     session.add(post_likes)
+#     session.commit()
+#     session.close()
+#     msj={"msj":"Like Creado"}
+#     return Response(json.dumps(msj), status=200, mimetype='application/json')
 
 
+# @app.route('/post_likes', methods = ['DELETE'])
+# def delete_post_likes():
+#     post_id = json.loads(request.data)['post_id']
+#     user_id = json.loads(request.data)['user_id']
+#     session = db.getSession(engine)
+#     like = session.query(entities.Post_likes).filter(and_(entities.Post_likes.post_id == post_id,entities.Post_likes.user_id == user_id)).one()
+#     session.delete(like)
+#     session.commit()
+#     session.close()
+#     msj={"msj":"Like borrado"} 
+#     return Response(json.dumps(msj), status=200, mimetype='application/json')
 
 
 
 
 
 
-@app.route('/post', methods = ['GET'])
-def get_post():
-    lock.acquire()
-    list = []
-    if key_post in cache and(datetime.now()-cache[key_post]['datetime']).total_seconds()< 20:
-        list = cache[key_post]['data']
-    else:
-        session = db.getSession(engine)
-        dbResponse = session.query(entities.Post).filter(entities.Post.estado==0)
-        for dat in dbResponse:
-            obj={}
-            obj['id'] = dat.id
-            obj['titulo'] = dat.titulo
-            obj['contenido'] = dat.contenido
-            obj['tipo'] = dat.tipo
-            obj['fecha_post'] =dat.fecha_post if dat.fecha_post is None else dat.fecha_post.strftime("%m/%d/%Y  %H:%M:%S")
-            obj['user_id'] = dat.user_id
-            post_likes = session.query(entities.Post_likes).filter(entities.Post_likes.post_id == dat.id);
-            user= session.query(entities.User).filter(entities.User.id == dat.user_id).one()
-            data_likes = post_likes[:]
-            obj['user_created']=user.to_dict()
-            obj['likes']=  [x.to_dict() for x in data_likes]
-            list.insert(0,obj)
+
+
+# @app.route('/post', methods = ['GET'])
+# def get_post():
+#     lock.acquire()
+#     list = []
+#     if key_post in cache and(datetime.now()-cache[key_post]['datetime']).total_seconds()< 20:
+#         list = cache[key_post]['data']
+#     else:
+#         session = db.getSession(engine)
+#         dbResponse = session.query(entities.Post).filter(entities.Post.estado==0)
+#         for dat in dbResponse:
+#             obj={}
+#             obj['id'] = dat.id
+#             obj['titulo'] = dat.titulo
+#             obj['contenido'] = dat.contenido
+#             obj['tipo'] = dat.tipo
+#             obj['fecha_post'] =dat.fecha_post if dat.fecha_post is None else dat.fecha_post.strftime("%m/%d/%Y  %H:%M:%S")
+#             obj['user_id'] = dat.user_id
+#             post_likes = session.query(entities.Post_likes).filter(entities.Post_likes.post_id == dat.id);
+#             user= session.query(entities.User).filter(entities.User.id == dat.user_id).one()
+#             data_likes = post_likes[:]
+#             obj['user_created']=user.to_dict()
+#             obj['likes']=  [x.to_dict() for x in data_likes]
+#             list.insert(0,obj)
         
-        #list.sort(key=lambda x: x['id'], reverse=False)
-        cache[key_post] = {'data':list,'datetime':datetime.now()}
-        #print(list)
-        session.close()
-    lock.release()
-    return Response(json.dumps(list), status=200, mimetype='application/json')
+#         #list.sort(key=lambda x: x['id'], reverse=False)
+#         cache[key_post] = {'data':list,'datetime':datetime.now()}
+#         #print(list)
+#         session.close()
+#     lock.release()
+#     return Response(json.dumps(list), status=200, mimetype='application/json')
 
 
-@app.route('/post/<id>', methods = ['GET'])
-def get_post_by_id(id):
-    session = db.getSession(engine)
-    dbResponse = session.query(entities.Post).filter(entities.Post.id==int(id)).one()
-    post_=dbResponse.to_dict()
-    post_likes = session.query(entities.Post_likes).filter(entities.Post_likes.post_id == post_['id']);
-    data_likes = post_likes[:]
-    user= session.query(entities.User).filter(entities.User.id == post_['user_id']).one()
-    post_['user_created']=user.to_dict()
-    post_['likes']=[x.to_dict() for x in data_likes]
+# @app.route('/post/<id>', methods = ['GET'])
+# def get_post_by_id(id):
+#     session = db.getSession(engine)
+#     dbResponse = session.query(entities.Post).filter(entities.Post.id==int(id)).one()
+#     post_=dbResponse.to_dict()
+#     post_likes = session.query(entities.Post_likes).filter(entities.Post_likes.post_id == post_['id']);
+#     data_likes = post_likes[:]
+#     user= session.query(entities.User).filter(entities.User.id == post_['user_id']).one()
+#     post_['user_created']=user.to_dict()
+#     post_['likes']=[x.to_dict() for x in data_likes]
     
-    return Response(json.dumps(post_), status=200, mimetype='application/json')
+#     return Response(json.dumps(post_), status=200, mimetype='application/json')
 
 
 
@@ -246,84 +296,84 @@ def get_post_by_id(id):
 # }
 
 
-@app.route('/post', methods = ['PUT'])
-def update_post():
-    session = db.getSession(engine)
-    id = json.loads(request.data)['key']
-    post = session.query(entities.Post).filter(entities.Post.id == id).first()
-    c = json.loads(request.data)['values']
-    for key in c.keys():
-        setattr(post, key, c[key])
-    session.add(post)
-    session.commit()
-    session.close()
-    msj={"msj":"Post Editado"} 
-    return Response(json.dumps(msj), status=200, mimetype='application/json')
+# @app.route('/post', methods = ['PUT'])
+# def update_post():
+#     session = db.getSession(engine)
+#     id = json.loads(request.data)['key']
+#     post = session.query(entities.Post).filter(entities.Post.id == id).first()
+#     c = json.loads(request.data)['values']
+#     for key in c.keys():
+#         setattr(post, key, c[key])
+#     session.add(post)
+#     session.commit()
+#     session.close()
+#     msj={"msj":"Post Editado"} 
+#     return Response(json.dumps(msj), status=200, mimetype='application/json')
 
 
-@app.route('/post_message',methods=['POST'])
-def post_message():
-    if (not request.is_json):
-        c = json.loads(request.data)['values']
-    else:
-        c = json.loads(request.data)
+# @app.route('/post_message',methods=['POST'])
+# def post_message():
+#     if (not request.is_json):
+#         c = json.loads(request.data)['values']
+#     else:
+#         c = json.loads(request.data)
         
-    # post_message = entities.Post_Messajes(
-    # post_id=c['post_id'],
-    # mensaje = c['mensaje'],
-    # sent_on=datetime.now(),
-    # user_id=c['user_id'],
-    # post_id_parent=c['post_id_parent'] if 'post_id_parent' in c else None,
-    # post_mensaje_id_parent=c['post_mensaje_id_parent'] if 'post_mensaje_id_parent' in c else None
-    # )
+#     # post_message = entities.Post_Messajes(
+#     # post_id=c['post_id'],
+#     # mensaje = c['mensaje'],
+#     # sent_on=datetime.now(),
+#     # user_id=c['user_id'],
+#     # post_id_parent=c['post_id_parent'] if 'post_id_parent' in c else None,
+#     # post_mensaje_id_parent=c['post_mensaje_id_parent'] if 'post_mensaje_id_parent' in c else None
+#     # )
 
-    post_message = entities.Post_Messajes(
-    post_id=c['post_id'],
-    mensaje = c['mensaje'],
-    sent_on=datetime.now(),
-    user_id=c['user_id'],
-    estado=0
-    )
+#     post_message = entities.Post_Messajes(
+#     post_id=c['post_id'],
+#     mensaje = c['mensaje'],
+#     sent_on=datetime.now(),
+#     user_id=c['user_id'],
+#     estado=0
+#     )
 
-    session = db.getSession(engine)
-    session.add(post_message)
-    session.commit()
-    post_text=post_message.to_dict()
-    print(post_text)
-    session.close()
-    user= session.query(entities.User).filter(entities.User.id == post_text['user_id']).one()
-    post_text['user_created']=user.to_dict()
-    return Response(json.dumps(post_text), status=200, mimetype='application/json')
+#     session = db.getSession(engine)
+#     session.add(post_message)
+#     session.commit()
+#     post_text=post_message.to_dict()
+#     print(post_text)
+#     session.close()
+#     user= session.query(entities.User).filter(entities.User.id == post_text['user_id']).one()
+#     post_text['user_created']=user.to_dict()
+#     return Response(json.dumps(post_text), status=200, mimetype='application/json')
 
-@app.route('/post_message/<post_id>',methods=['GET'])
-def get_post_message_by_post_id(post_id):
-    session = db.getSession(engine)
-    dbResponse = session.query(entities.Post_Messajes).filter(entities.Post_Messajes.post_id==int(post_id)).filter(entities.Post_Messajes.estado==0)
-    post_message = dbResponse[:]
-    post_allmessage = []
-    for dat in post_message:
-        post_message_i=dat.to_dict()
-        user= session.query(entities.User).filter(entities.User.id == post_message_i['user_id']).one()
-        post_message_i['user_created']=user.to_dict()
-        post_allmessage.append(post_message_i)
+# @app.route('/post_message/<post_id>',methods=['GET'])
+# def get_post_message_by_post_id(post_id):
+#     session = db.getSession(engine)
+#     dbResponse = session.query(entities.Post_Messajes).filter(entities.Post_Messajes.post_id==int(post_id)).filter(entities.Post_Messajes.estado==0)
+#     post_message = dbResponse[:]
+#     post_allmessage = []
+#     for dat in post_message:
+#         post_message_i=dat.to_dict()
+#         user= session.query(entities.User).filter(entities.User.id == post_message_i['user_id']).one()
+#         post_message_i['user_created']=user.to_dict()
+#         post_allmessage.append(post_message_i)
 
-    post_allmessage.sort(key=lambda x: x['id'], reverse=False)
-    return Response(json.dumps(post_allmessage), status=200, mimetype='application/json')
+#     post_allmessage.sort(key=lambda x: x['id'], reverse=False)
+#     return Response(json.dumps(post_allmessage), status=200, mimetype='application/json')
 
 
-@app.route('/post_message', methods = ['PUT'])
-def update_post_message():
-    session = db.getSession(engine)
-    id = json.loads(request.data)['key']
-    post = session.query(entities.Post_Messajes).filter(entities.Post_Messajes.id == id).first()
-    c = json.loads(request.data)['values']
-    for key in c.keys():
-        setattr(post, key, c[key])
-    session.add(post)
-    session.commit()
-    session.close()
-    msj={"msj":"Post Message Editado"} 
-    return Response(json.dumps(msj), status=200, mimetype='application/json')
+# @app.route('/post_message', methods = ['PUT'])
+# def update_post_message():
+#     session = db.getSession(engine)
+#     id = json.loads(request.data)['key']
+#     post = session.query(entities.Post_Messajes).filter(entities.Post_Messajes.id == id).first()
+#     c = json.loads(request.data)['values']
+#     for key in c.keys():
+#         setattr(post, key, c[key])
+#     session.add(post)
+#     session.commit()
+#     session.close()
+#     msj={"msj":"Post Message Editado"} 
+#     return Response(json.dumps(msj), status=200, mimetype='application/json')
 
 
 
