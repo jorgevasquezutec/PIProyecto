@@ -8,27 +8,15 @@ title('Imagen Ingresada')
 gray_image = rgb2gray(imagen);
 figure,imshow(gray_image)
 title('Imagen en escala de grises')
+gray_image = imadjust(gray_image,[0.3 0.7],[]);
+figure,imshow(gray_image)
+title('INTENSE')
 
+bin = imbinarize(gray_image);
+bin = imclearborder(bin);
 
-[~, threshold] = edge(gray_image, 'borde');
-cc = 1.5;
-imagen_bordeada = edge(gray_image,'borde', threshold*cc);
-imagen_bordeada1= imclearborder(imagen_bordeada);
-figure
-imshow(imagen_bordeada1)
-title('Imagen bordeada')
-
-% Filling the holes of above processed image
-imagen_sin_agujeros = imfill(imagen_bordeada1,'holes');
-
-
-%Extraemos los circulos con area entre el rango mostrado. %stats = regionprops('table',imagen_sin_agujeros,'Area')
-extractCircle = bwpropfilt(imagen_sin_agujeros,'Area',[380 750]);
-figure
-imshow(extractCircle)
-title('RBC Extraídas')
-
-% Contar el numero de circulos
-f = bwconncomp(extractCircle, 4);
-RBC_counter = f.NumObjects;
-fprintf('%s %d\n','Cantidad de RBC = ',RBC_counter);
+[labeledImage, numbercircles] = bwlabel(bin);
+m = regionprops(labeledImage);
+figure,imshow(bin)
+title('bin')
+disp(numbercircles)
