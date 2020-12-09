@@ -1,5 +1,6 @@
-    close all;
-imagen=imread('cells.jpg');
+close all;
+clear all;
+imagen=imread('cells2.jpg');
 figure
 imshow(imagen)
 title('Imagen Original')
@@ -33,9 +34,9 @@ imshow(J);
 J= imclearborder(J);
 figure
 imshow(J);
-[labeledImage, numbercircles] = bwlabel(J);
+[labeledImage, manchas_counter] = bwlabel(J);
 disp("Manchas")
-disp(numbercircles);
+disp(manchas_counter);
 
 
 
@@ -47,12 +48,10 @@ gray_image = imadjust(gray_image,[0.3 0.7],[]);
 bin = imbinarize(gray_image);
 bin = imclearborder(bin);
 bin = bwareaopen(bin, 10);
-[labeledImage0, numbercircles0] = bwlabel(bin);
+[labeledImage0, WBC_counter] = bwlabel(bin);
 m = regionprops(labeledImage0);
 figure,imshow(labeledImage0)
 title('bin')
-disp('Globulos blancos')
-disp(numbercircles0)
 
 
 
@@ -75,7 +74,7 @@ title('imagen_sin_agujeros')
 stats = regionprops('table',imagen_sin_agujeros,'Area');
 stats = sortrows(stats,'Area');
 evaluateStat=unique(stats);
-disp(evaluateStat)
+%disp(size(stats))
 
 
 extractCircle = bwpropfilt(imagen_sin_agujeros,'Area',[100 2799]);
@@ -90,24 +89,48 @@ imshow(newfinal);
 title('sin manchas')
 
 stats = regionprops('table',logical(newfinal),'Centroid',...
-'MajorAxisLength','MinorAxisLength')
+'MajorAxisLength','MinorAxisLength');
 
 
+stats3 = stats{1:size(stats),{'MajorAxisLength'}} - stats{1:size(stats),{'MinorAxisLength'}};
+stats3 = mean(stats3);
+Total_counter2 = 0;
+for i=1:size(stats)
+        resta = stats{i,{'MajorAxisLength'}} - stats{i,{'MinorAxisLength'}};
+        if resta < stats3
+            Total_counter2 = Total_counter2 + 1;
+        else
+            Total_counter2 = Total_counter2 + floor((stats{i,{'MajorAxisLength'}} - stats{i,{'MinorAxisLength'}}) / stats3);
+        end
+end
+% WBC_counter = fix(WBC_counter);
+%{
+for row = 1:size(A,1)
+    for col = 1:size(A,2)
+        suma = suma + A(row, col);
+    end
+end
+%}
 
-    
     % Contar el numero de circulos
 f = bwconncomp(extractCircle, 8);
-RBC_counter = f.NumObjects;
+Total_counter = f.NumObjects;
 
 disp("Total Celulas")
+disp(Total_counter)
+
+%disp("Total Celulas 2")
+%disp(Total_counter2)
+
+disp('Glóbulos blancos')
+disp(WBC_counter);
+
+RBC_counter = Total_counter-manchas_counter-WBC_counter;
+disp("Globulos rojos")
 disp(RBC_counter)
 
-
-disp("Globulos rojos")
-disp(RBC_counter-numbercircles-numbercircles0)
-
-
-
-
-
-
+if (WBC_counter > RBC_counter)
+    disp("Positivo para leucemia");
+else
+    disp("Negativo para leucemia");
+end
