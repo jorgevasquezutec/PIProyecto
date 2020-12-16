@@ -7,7 +7,8 @@ from sqlalchemy import and_
 import json
 import threading
 import time
-import countLeucositos
+#import countLeucositos
+import countFinal
 import matlab
 from werkzeug.utils import secure_filename
 
