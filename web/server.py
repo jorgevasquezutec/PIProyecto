@@ -7,8 +7,8 @@ from sqlalchemy import and_
 import json
 import threading
 import time
-#import countLeucositos
-import countFinal
+import countLeucositos
+# import countFinal
 import matlab
 from werkzeug.utils import secure_filename
 
@@ -141,12 +141,13 @@ def get_users():
     else:
         session = db.getSession(engine)
         dbResponse = session.query(entities.User)
-        data = dbResponse[:]
+        data = [x.to_dict() for x in dbResponse]
         now = datetime.now()
         session.close()
         cache[key_users] = {'data':data, 'datetime':now}
         print("using db")
-    return Response(json.dumps(data, status=200, cls=connector.AlchemyEncoder), mimetype='application/json')
+        print(data)
+    return Response(json.dumps(data), status=201,mimetype='application/json')
 
 @app.route('/users', methods = ['PUT'])
 def update_user():
