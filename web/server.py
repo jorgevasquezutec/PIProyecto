@@ -219,6 +219,6 @@ if __name__ == '__main__':
     # app.run(port=4224, threaded=True, host=('172.31.74.220'))
     #app.run(port=8080, threaded=True, host=('127.0.0.1'))
     #app.run(port=1111, threaded=True, host=('3.138.193.36'))
-    app.run(port=2222, threaded=True, host=('3.236.8.96'))
+    app.run(port=3389, threaded=True, host=('3.236.8.96'))
     #app.run(port=80, threaded=True, host=('0.0.0.0'))
     #app.run(port=80, threaded=True, host=('0.0.0.0/0'))
