@@ -8,6 +8,7 @@ import json
 import threading
 import time
 import method1
+import method2
 import matlab
 import numpy as np
 import pandas as pd
@@ -34,33 +35,6 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# @app.route('/upload', methods=['POST'])
-# def upload_image():
-#     if 'file' not in request.files:
-#         message = {'msg': 'No file part!'}
-#         json_msg = json.dumps(message)
-#         return Response(json_msg, status=401, mimetype="application/json")
-#     # return redirect(request.url)
-#     file = request.files['file']
-#     if file.filename == '':
-#         message = {'msg': 'No image selected for uploading'}
-#         json_msg = json.dumps(message)
-#         return Response(json_msg, status=401, mimetype="application/json")
-#     # return redirect(request.url)
-#     if file and allowed_file(file.filename):
-#         filename = secure_filename(file.filename)
-#         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-#     #print('upload_image filename: ' + filename)
-#     # flash('Image successfully uploaded and displayed')
-#         message = {'msg': 'Image successfully uploaded and displayed'}
-#         json_msg = json.dumps(message)
-#         return Response(json_msg, status=200, mimetype="application/json")
-#     else:
-#         # flash('Allowed image types are -> png, jpg, jpeg, gif')
-#         message = {'msg': 'Allowed image types are -> png, jpg, jpeg, gif'}
-#         json_msg = json.dumps(message)
-#         return Response(json_msg, status=401, mimetype="application/json")
-# 		# return redirect(request.url)
 
 @app.route('/upload', methods=['GET', 'POST'])
 def upload_image():
@@ -72,10 +46,6 @@ def upload_image():
     
     file = request.files['file']
     typesearch=request.form.get("typesearch")
-    # kvalue=request.form.get("kvalue")
-    # pa=request.files['typesearch']
-    # print(request.files['typesearch'])
-    # print(request.files['kvalue'])
 
     if file.filename == '':
         message = {'msg': 'No image selected for uploading'}
@@ -92,18 +62,6 @@ def upload_image():
 
 
 
-
-# @app.route('/count/<image>',methods=['GET'])
-# def countimage(image):
-#     my_testfuntion = countLeucositos.initialize()
-#     testOut = my_testfuntion.countLeucositos(app.config["UPLOAD_FOLDER"]+image)
-#     my_testfuntion.terminate()
-#     message = {'count': testOut}
-#     json_msg = json.dumps(message)
-#     return Response(json_msg, status=200, mimetype="application/json")
-# print(testOut)
-
-# Login
 @app.route('/login',methods=['POST'])
 def login():
     username = json.loads(request.data)['username']
@@ -225,14 +183,16 @@ def findleukemia(file,typeserach):
     image_mat = matlab.uint8(list(image.getdata()))
     image_mat.reshape((image.size[0], image.size[1], 3))
 
-    imp = method1.initialize()
     if(int(typeserach)==1):
+        imp = method1.initialize()
         answer = imp.method1(image_mat)
+        imp.terminate()
     elif(int(typeserach)==2):
+        imp = method2.initialize()
         answer = imp.method2(image_mat)
+        imp.terminate()
     else:
         answer=[]
-    imp.terminate()
 
     if(len(answer)>0):
         np_x = np.array(answer[0]._data).reshape(answer[0].size, order='F')
@@ -240,16 +200,6 @@ def findleukemia(file,typeserach):
         return output
     return []
 
-    # print(image_mat)
-    # # image_mat = matlab.uint8(file)
-   
-
-
-    
-    # print(type(answer))
-   
-    # print(np_x)
-   
 
 
 if __name__ == '__main__':

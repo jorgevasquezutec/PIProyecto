@@ -13,6 +13,12 @@ $(function () {
       var formData = new FormData(this);
       var option=$("#typeSearch").val();
       formData.append("typesearch", option);
+      $( "body" ).addClass( "loader loader-default is-active" );
+      $("#tcell").text("");
+      $("#bred").text("");
+      $("#bwhite").text("");
+      $("#spots").text("");
+      $("#result").text("");
 
       $.ajax({
           type:'POST',
@@ -26,9 +32,19 @@ $(function () {
             // $.growl.notice({ message: data.msg });
             // $.growl.warning({ message: "The kitten is ugly!" });
           // </script>
-              console.log(data);
+          var result = data[2]>data[1] ?'Have leukemia':'does not have leukemia';
+          $( "body" ).removeClass( "loader loader-default is-active" );
+          $("#result").text(result);
+          $("#tcell").text( data[0]);
+          $("#bred").text( data[1]);
+          $("#bwhite").text( data[2]);
+          $("#spots").text( data[3]);
+          
+
+          
           },
           error: function(data){
+            $( "body" ).removeClass( "loader loader-default is-active" );
             // $.growl.error({ message: data.msg});
               console.log(data);
           }
