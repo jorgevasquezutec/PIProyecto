@@ -53,7 +53,16 @@ def upload_image():
         return Response(json_msg, status=401, mimetype="application/json")
 
     if file and allowed_file(file.filename):
-        output = findleukemia (file,typesearch)
+        imagesave=file.filename+typesearch
+        print(imagesave)
+        if imagesave in cache and (datetime.now()-cache[imagesave]['datetime']).total_seconds()<300:
+            output = cache[imagesave]['data']
+            print(output)
+            print("using cache")
+        else:
+            print("using matlab")
+            output = findleukemia (file,typesearch,imagesave)
+            print(output)
         return Response(output, status=201, mimetype="application/json")
     else:
         message = {'msg': 'Allowed image types are -> png, jpg, jpeg, gif'}
@@ -177,7 +186,7 @@ def logout():
 
 
 
-def findleukemia(file,typeserach):
+def findleukemia(file,typeserach,imagesave):
     
     image = Image.open(file)
     image_mat = matlab.uint8(list(image.getdata()))
@@ -197,15 +206,18 @@ def findleukemia(file,typeserach):
     if(len(answer)>0):
         np_x = np.array(answer[0]._data).reshape(answer[0].size, order='F')
         output=pd.Series(np_x).to_json(orient='values')
+        now = datetime.now()
+        cache[imagesave] = {'data':output, 'datetime':now}
         return output
+
     return []
 
 
 
 if __name__ == '__main__':
     app.secret_key = ".."
-    app.run(port=4224, threaded=True, host=('172.31.74.220'))
-    #app.run(port=8080, threaded=True, host=('127.0.0.1'))
+    # app.run(port=4224, threaded=True, host=('172.31.74.220'))
+    app.run(port=8080, threaded=True, host=('127.0.0.1'))
     #app.run(port=1111, threaded=True, host=('3.138.193.36'))
     #app.run(port=80, threaded=True, host=('0.0.0.0'))
     #app.run(port=80, threaded=True, host=('0.0.0.0/0'))
