@@ -1,6 +1,6 @@
-function n =method1(imagen)
+function n = method1(imagen)
     % imagen=imread(imagen);
-    % imagen=imread('fotos/cells.jpg');
+    %imagen=imread(ruta);
     % figure
     % imshow(imagen)
     % title('Imagen Original')

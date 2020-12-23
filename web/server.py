@@ -10,6 +10,7 @@ import time
 import method1
 import matlab
 import numpy as np
+import pandas as pd
 from PIL import Image
 from werkzeug.utils import secure_filename
 
@@ -70,7 +71,7 @@ def upload_image():
         return Response(json_msg, status=401, mimetype="application/json")
     
     file = request.files['file']
-    # typesearch=request.form.get("typesearch")
+    typesearch=request.form.get("typesearch")
     # kvalue=request.form.get("kvalue")
     # pa=request.files['typesearch']
     # print(request.files['typesearch'])
@@ -82,19 +83,8 @@ def upload_image():
         return Response(json_msg, status=401, mimetype="application/json")
 
     if file and allowed_file(file.filename):
-        imp = method1.initialize()
-        image = Image.open(file)
-        image_mat = matlab.uint8(list(image.getdata()))
-        image_mat.reshape((image.size[0], image.size[1], 3))
-        # print(image_mat)
-        # # image_mat = matlab.uint8(file)
-        answer = imp.method1(image_mat)
-        imp.terminate()
-        # print(type(answer))
-        np_x = np.array(answer._data).reshape(answer.size, order='F')
-        # print(np_x)
-        # json_msg = json.dumps(np_x)
-        return Response(np_x, status=201, mimetype="application/json")
+        output = findleukemia (file,typesearch)
+        return Response(output, status=201, mimetype="application/json")
     else:
         message = {'msg': 'Allowed image types are -> png, jpg, jpeg, gif'}
         json_msg = json.dumps(message)
@@ -224,8 +214,42 @@ def delete_user():
 def logout():
     if 'user' in session:
         session.pop('user')
-    time.sleep(1);
+    time.sleep(1)
     return render_template("login.html")
+
+
+
+def findleukemia(file,typeserach):
+    
+    image = Image.open(file)
+    image_mat = matlab.uint8(list(image.getdata()))
+    image_mat.reshape((image.size[0], image.size[1], 3))
+
+    imp = method1.initialize()
+    if(int(typeserach)==1):
+        answer = imp.method1(image_mat)
+    elif(int(typeserach)==2):
+        answer = imp.method2(image_mat)
+    else:
+        answer=[]
+    imp.terminate()
+
+    if(len(answer)>0):
+        np_x = np.array(answer[0]._data).reshape(answer[0].size, order='F')
+        output=pd.Series(np_x).to_json(orient='values')
+        return output
+    return []
+
+    # print(image_mat)
+    # # image_mat = matlab.uint8(file)
+   
+
+
+    
+    # print(type(answer))
+   
+    # print(np_x)
+   
 
 
 if __name__ == '__main__':

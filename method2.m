@@ -1,6 +1,6 @@
 function n = method2(imagen)
     % imagen=imread(imagen);
-    %imagen=imread('cells2.jpg');
+    %imagen=imread(ruta);
     % figure
     % imshow(imagen)
     % title('Imagen Original')
@@ -129,5 +129,4 @@ function n = method2(imagen)
     %totalCelulas = f.NumObjects;
     globulosRojos=Total_counter2-globulosblancos-manchas;
     n=[Total_counter2 globulosRojos globulosblancos manchas];
-    disp(n)
 end

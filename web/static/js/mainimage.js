@@ -11,6 +11,8 @@ $(function () {
     $('#imageUploadForm').on('submit',(function(e) {
       e.preventDefault();
       var formData = new FormData(this);
+      var option=$("#typeSearch").val();
+      formData.append("typesearch", option);
 
       $.ajax({
           type:'POST',
@@ -32,19 +34,6 @@ $(function () {
           }
       });
   }));
-
-  // $("#ImageBrowse").on("change", function() {
-  //     $("#imageUploadForm").submit();
-  // });
-
-
-  // $('#icount').on('click',function(){
-  //   var input = $(this)
-  //   var name =input[0].form[0].files[0].name;
-  //   $.getJSON("/count/"+name, function (data) {
-  //     $.growl.notice({ message: data.count });
-  //   });
-  // });
 
   $('.btn-file :file').on('change', function() {
     // console.log("entro1");
@@ -79,22 +68,6 @@ $(function () {
   });
 
 });
-
-
-// function readURL(input) {
-//   if (input.files && input.files[0]) {
-//       var reader = new FileReader();
-  
-//       reader.onload = function (e) {
-//           $('#blah')
-//               .attr('src', e.target.result)
-//               // .width(500)
-//               // .height(200);
-//       };
-  
-//       reader.readAsDataURL(input.files[0]);
-//   }
-//   }
 
 
 
