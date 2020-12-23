@@ -1,6 +1,6 @@
-% function n =method1(imagen)
+function n = method2(imagen)
     % imagen=imread(imagen);
-    imagen=imread('fotos/cells.jpg');
+    %imagen=imread('cells2.jpg');
     % figure
     % imshow(imagen)
     % title('Imagen Original')
@@ -100,9 +100,9 @@
 
 
     newfinal=M.*extractCircle;
-    figure
-    imshow(newfinal);
-    title('sin manchas')
+    %figure
+    %imshow(newfinal);
+    %title('sin manchas')
     
     stats = regionprops('table',logical(newfinal),'Centroid',...
     'MajorAxisLength','MinorAxisLength');
@@ -125,13 +125,9 @@
 
 
     % Contar el numero de circulos
-    f = bwconncomp(extractCircle, 8);
-    totalCelulas = f.NumObjects;
-    globulosRojos=totalCelulas-globulosblancos-manchas;
-    n=[totalCelulas globulosRojos globulosblancos manchas];
-
-% end
-
-
-
-
+    %f = bwconncomp(extractCircle, 8);
+    %totalCelulas = f.NumObjects;
+    globulosRojos=Total_counter2-globulosblancos-manchas;
+    n=[Total_counter2 globulosRojos globulosblancos manchas];
+    disp(n)
+end
