@@ -114,9 +114,7 @@ For details, see GettingStarted.html, distributed with this package, or the offi
     <fileset.resources />
     <fileset.depfun />
     <fileset.package />
-    <fileset.examples>
-      <file>${PROJECT_ROOT}\method1Sample1.m</file>
-    </fileset.examples>
+    <fileset.examples />
     <fileset.documentation />
     <build-deliverables>
       <file location="${PROJECT_ROOT}\method1\for_testing" name="setup.py" optional="false">D:\UTEC\ciclo4\pi\PIProyecto\method1\for_testing\setup.py</file>

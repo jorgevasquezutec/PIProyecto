@@ -7,22 +7,21 @@ from sqlalchemy import and_
 import json
 import threading
 import time
-import countLeucositos
-# import countFinal
+import method1
 import matlab
+import numpy as np
+from PIL import Image
 from werkzeug.utils import secure_filename
 
-key_messages = 'messages'
 key_users = 'users'
-key_post='post'
 cache = {}
 lock = threading.Lock()
 db = connector.Manager()
 engine = db.createEngine()
 app = Flask(__name__, template_folder= "static/html")
 
-app.config["UPLOAD_FOLDER"] = "upload/"
-ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg'])
+# app.config["UPLOAD_FOLDER"] = "upload/"
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg'}
 
 
 
@@ -31,44 +30,87 @@ def index():
     return render_template("login.html")
 
 def allowed_file(filename):
-	return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-@app.route('/upload', methods=['POST'])
+# @app.route('/upload', methods=['POST'])
+# def upload_image():
+#     if 'file' not in request.files:
+#         message = {'msg': 'No file part!'}
+#         json_msg = json.dumps(message)
+#         return Response(json_msg, status=401, mimetype="application/json")
+#     # return redirect(request.url)
+#     file = request.files['file']
+#     if file.filename == '':
+#         message = {'msg': 'No image selected for uploading'}
+#         json_msg = json.dumps(message)
+#         return Response(json_msg, status=401, mimetype="application/json")
+#     # return redirect(request.url)
+#     if file and allowed_file(file.filename):
+#         filename = secure_filename(file.filename)
+#         file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+#     #print('upload_image filename: ' + filename)
+#     # flash('Image successfully uploaded and displayed')
+#         message = {'msg': 'Image successfully uploaded and displayed'}
+#         json_msg = json.dumps(message)
+#         return Response(json_msg, status=200, mimetype="application/json")
+#     else:
+#         # flash('Allowed image types are -> png, jpg, jpeg, gif')
+#         message = {'msg': 'Allowed image types are -> png, jpg, jpeg, gif'}
+#         json_msg = json.dumps(message)
+#         return Response(json_msg, status=401, mimetype="application/json")
+# 		# return redirect(request.url)
+
+@app.route('/upload', methods=['GET', 'POST'])
 def upload_image():
+    # print(request.__dict__)
     if 'file' not in request.files:
         message = {'msg': 'No file part!'}
         json_msg = json.dumps(message)
         return Response(json_msg, status=401, mimetype="application/json")
-    # return redirect(request.url)
+    
     file = request.files['file']
+    # typesearch=request.form.get("typesearch")
+    # kvalue=request.form.get("kvalue")
+    # pa=request.files['typesearch']
+    # print(request.files['typesearch'])
+    # print(request.files['kvalue'])
+
     if file.filename == '':
         message = {'msg': 'No image selected for uploading'}
         json_msg = json.dumps(message)
         return Response(json_msg, status=401, mimetype="application/json")
-    # return redirect(request.url)
+
     if file and allowed_file(file.filename):
-        filename = secure_filename(file.filename)
-        file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-    #print('upload_image filename: ' + filename)
-    # flash('Image successfully uploaded and displayed')
-        message = {'msg': 'Image successfully uploaded and displayed'}
-        json_msg = json.dumps(message)
-        return Response(json_msg, status=200, mimetype="application/json")
+        imp = method1.initialize()
+        image = Image.open(file)
+        image_mat = matlab.uint8(list(image.getdata()))
+        image_mat.reshape((image.size[0], image.size[1], 3))
+        # print(image_mat)
+        # # image_mat = matlab.uint8(file)
+        answer = imp.method1(image_mat)
+        imp.terminate()
+        # print(type(answer))
+        np_x = np.array(answer._data).reshape(answer.size, order='F')
+        # print(np_x)
+        # json_msg = json.dumps(np_x)
+        return Response(np_x, status=201, mimetype="application/json")
     else:
-        # flash('Allowed image types are -> png, jpg, jpeg, gif')
         message = {'msg': 'Allowed image types are -> png, jpg, jpeg, gif'}
         json_msg = json.dumps(message)
         return Response(json_msg, status=401, mimetype="application/json")
-		# return redirect(request.url)    
 
-@app.route('/count/<image>',methods=['GET'])
-def countimage(image):
-    my_testfuntion = countLeucositos.initialize()
-    testOut = my_testfuntion.countLeucositos(app.config["UPLOAD_FOLDER"]+image)
-    my_testfuntion.terminate()
-    message = {'count': testOut}
-    json_msg = json.dumps(message)
-    return Response(json_msg, status=200, mimetype="application/json")
+
+
+
+# @app.route('/count/<image>',methods=['GET'])
+# def countimage(image):
+#     my_testfuntion = countLeucositos.initialize()
+#     testOut = my_testfuntion.countLeucositos(app.config["UPLOAD_FOLDER"]+image)
+#     my_testfuntion.terminate()
+#     message = {'count': testOut}
+#     json_msg = json.dumps(message)
+#     return Response(json_msg, status=200, mimetype="application/json")
 # print(testOut)
 
 # Login
