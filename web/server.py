@@ -255,4 +255,4 @@ def findleukemia(file,typeserach):
 if __name__ == '__main__':
     app.secret_key = ".."
     # app.run(port=80, threaded=True, host=('172.31.74.220'))
-    app.run(port=80, threaded=True, host=('190.237.15.223/32'))
+    app.run(port=80, threaded=True, host=('190.237.15.223'))
