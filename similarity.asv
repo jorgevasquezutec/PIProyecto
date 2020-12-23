@@ -1,0 +1,8 @@
+close all;
+clear all;
+image1 = imread('PPTFOTOS/spots/spotO1.jpg');
+image1 = imbinarize(image1);
+image2 = imread('PPTFOTOS/spots/spotT1.jpg');
+image2 = imbinarize(image2);
+res = jaccard(image1, image2);
+disp(res)
