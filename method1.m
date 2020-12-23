@@ -1,5 +1,5 @@
 function n =method1(imagen)
-    imagen=imread(imagen);
+    % imagen=imread(imagen);
     % imagen=imread('fotos/cells.jpg');
     % figure
     % imshow(imagen)
