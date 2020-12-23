@@ -102,8 +102,11 @@ function n =method1(imagen)
     f = bwconncomp(extractCircle, 8);
     totalCelulas = f.NumObjects;
     globulosRojos=totalCelulas-globulosblancos-manchas;
-    n=[totalCelulas globulosRojos globulosblancos manchas];
 
+
+    
+    n=[totalCelulas globulosRojos globulosblancos manchas];
+end
 
 
 
