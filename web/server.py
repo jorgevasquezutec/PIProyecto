@@ -55,7 +55,7 @@ def upload_image():
     if file and allowed_file(file.filename):
         imagesave=file.filename+typesearch
         print(imagesave)
-        if imagesave in cache and (datetime.now()-cache[imagesave]['datetime']).total_seconds()<300:
+        if imagesave in cache and (datetime.now()-cache[imagesave]['datetime']).total_seconds()<1800:
             output = cache[imagesave]['data']
             print(output)
             print("using cache")
