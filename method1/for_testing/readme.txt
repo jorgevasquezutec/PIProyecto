@@ -1,4 +1,4 @@
-countLeucositos MATLAB Python Package
+method1 MATLAB Python Package
 
 1. Prerequisites for Deployment 
 
@@ -22,11 +22,11 @@ in the MathWorks Documentation Center.
 
 Verify that a Windows version of Python 2.7, 3.6, 3.7, and/or 3.8 is installed.
 
-2. Installing the countLeucositos Package
+2. Installing the method1 Package
 
-A. Change to the directory that contains the file setup.py and the subdirectory 
-countLeucositos. If you do not have write permissions, copy all its contents to a 
-temporary location and change to that directory.
+A. Change to the directory that contains the file setup.py and the subdirectory method1. 
+If you do not have write permissions, copy all its contents to a temporary location and 
+change to that directory.
 
 B. Execute the command:
 
@@ -40,11 +40,11 @@ the PYTHONPATH environment variable. For details, refer to:
     https://docs.python.org/2/install/index.html
 
 
-3. Using the countLeucositos Package
+3. Using the method1 Package
 
-The countLeucositos package is on your Python path. To import it into a Python script or 
-session, execute:
+The method1 package is on your Python path. To import it into a Python script or session, 
+execute:
 
-    import countLeucositos
+    import method1
 
 If a namespace must be specified for the package, modify the import statement accordingly.

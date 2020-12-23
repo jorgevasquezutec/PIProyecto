@@ -24,9 +24,9 @@ if __name__ == '__main__':
         url='https://www.mathworks.com/',
         platforms=['Linux', 'Windows', 'MacOS'],
         packages=[
-            'countLeucositos'
+            'method1'
         ],
-        package_data={'countLeucositos': ['*.ctf']},
+        package_data={'method1': ['*.ctf']},
         # Executes the custom code above in order to delete the build area.
         cmdclass={'install': InstallRuntime}
     )
